@@ -18,7 +18,8 @@ from config.config import (
     TWILIO_FROM_NUMBER,
 )
 
-
+from dotenv import load_dotenv
+load_dotenv()
 
 class MockGoogleCalendarService:
     """Mock Google Calendar integration"""
@@ -160,7 +161,7 @@ class MemoryStorage:
                 "description": "Weekly team sync",
                 "start_time": datetime.now() + timedelta(hours=1),
                 "end_time": datetime.now() + timedelta(hours=2),
-                "attendee_phone": "+919315563013",
+                "attendee_phone": os.getenv("TWILIO_TARGET_NUMBER"),
                 "location": "Conference Room A"
             },
             {
@@ -168,7 +169,7 @@ class MemoryStorage:
                 "description": "Submit final project deliverables",
                 "start_time": datetime.now() + timedelta(days=1),
                 "end_time": datetime.now() + timedelta(days=1, hours=1),
-                "attendee_phone": "+919315563013",
+                "attendee_phone": os.getenv("TWILIO_TARGET_NUMBER"),
                 "location": "Remote"
             }
         ]

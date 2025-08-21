@@ -3,11 +3,17 @@ from datetime import datetime, timedelta
 from typing import Optional, List
 from enum import Enum
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Text
-from database import Base
+
 
 class NotificationType(str, Enum):
     SMS = "sms"
     WHATSAPP = "whatsapp"
+
+
+class MessageType(str, Enum):
+    SMS = "sms"
+    WHATSAPP = "whatsapp"
+
 
 class EventStatus(str, Enum):
     SCHEDULED = "scheduled"
@@ -15,15 +21,21 @@ class EventStatus(str, Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
+
 class EventRequest(BaseModel):
     title: str = Field(..., description="Event title")
     description: Optional[str] = Field(None, description="Event description")
     start_time: datetime = Field(..., description="Event start time")
     end_time: datetime = Field(..., description="Event end time")
     attendee_phone: str = Field(..., description="Attendee phone number")
-    notification_type: NotificationType = Field(NotificationType.SMS, description="Notification method")
-    reminder_minutes: int = Field(15, description="Minutes before event to send reminder")
+    notification_type: NotificationType = Field(
+        NotificationType.SMS, description="Notification method"
+    )
+    reminder_minutes: int = Field(
+        15, description="Minutes before event to send reminder"
+    )
     location: Optional[str] = Field(None, description="Event location")
+
 
 class Event(BaseModel):
     id: str
@@ -39,31 +51,40 @@ class Event(BaseModel):
     created_at: datetime
     google_calendar_id: Optional[str] = None
 
+
 class EventResponse(BaseModel):
     success: bool
     message: str
     event: Optional[Event] = None
     error: Optional[str] = None
 
-class User(Base):
-    __tablename__ = "users"
-    
-    id = Column(String, primary_key=True)
-    email = Column(String, unique=True, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
 
-class DealWatch(Base):
-    __tablename__ = "deal_watches"
-    
-    id = Column(String, primary_key=True)
-    email = Column(String, index=True)
-    origin = Column(String)
-    destination = Column(String)
-    departure_date = Column(String)
-    return_date = Column(String, nullable=True)
-    max_price = Column(Float, nullable=True)
-    price_drop_threshold = Column(Float)
-    watch_end_date = Column(DateTime)
-    is_active = Column(Boolean, default=True)
-    alerts_sent = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+class ReminderRequest(BaseModel):
+    user_phone: str = Field(
+        ..., description="User's phone number with country code (e.g., +1234567890)"
+    )
+    message: str = Field(..., description="Reminder message to send")
+    scheduled_time: str = Field(
+        ..., description="When to send the reminder (e.g., '2025-08-21 10:30 AM IST')"
+    )
+    timezone: str = Field(
+        default="UTC",
+        description="User's timezone (e.g., 'Asia/Kolkata', 'America/New_York')",
+    )
+    message_type: MessageType = Field(
+        default=MessageType.SMS, description="Message type: SMS or WhatsApp"
+    )
+    recurrence: Optional[str] = Field(
+        default=None,
+        description="Recurrence pattern: 'daily', 'weekly', 'every 2 days', etc.",
+    )
+
+
+class OptOutRequest(BaseModel):
+    phone_number: str = Field(..., description="Phone number to opt out")
+
+
+class ReminderResponse(BaseModel):
+    success: bool
+    message: str
+    reminder_id: Optional[int] = None
